@@ -69,12 +69,13 @@ class _HomeScreenState extends State<detect_object_page> {
 
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
 
-    objDetect = await _objectModel.getImagePrediction(
+    try{
+      objDetect = await _objectModel.getImagePrediction(
       await File(image!.path).readAsBytes(),
       minimumScore: 0.1,
       IOUThershold: 0.3,
     );
-
+   
     // Extract class names
     classNames = [];
     for (var detection in objDetect) {
@@ -85,7 +86,13 @@ class _HomeScreenState extends State<detect_object_page> {
     setState(() {
       _image = File(image.path);
     });
+     }catch(e){
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('No Image Detected')
+      ));
+    }
   }
+  
 
   resultData() {
     var result = classNames;

@@ -28,8 +28,9 @@ class _RecipeListState extends State<RecipeList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Recipes List'),
+        title: Text('Recipes'),
         backgroundColor: Colors.pink,
+        centerTitle: true,        
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _recipesFuture,

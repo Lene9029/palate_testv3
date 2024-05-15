@@ -2,15 +2,13 @@ import 'package:sqflite/sqflite.dart' as sql;
 import 'package:flutter/foundation.dart';
 
 class SQLHelper{
-  static Future<void> createRecipeTable(sql.Database database) async {
+  static Future<void> createRecipeTables(sql.Database database) async {
     await database.execute(""" 
       CREATE TABLE recipe(
       id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
       name TEXT, 
     )""");
-  }
-  static Future<void> createIngredientsTabele(sql.Database database) async {
-    await database.execute("""
+     await database.execute("""
       CREATE TABLE ingredients(
        ingredientsID INTEGER,
        recipeID INTEGER,
@@ -18,9 +16,7 @@ class SQLHelper{
       )
     """
     );
-  }
-  static Future<void> createInstructionTable(sql.Database database) async {
-    await database.execute("""
+     await database.execute("""
     CREATE TABLE instructions(
       instructionsID INTEGER,
       recipeID INTEGER,
@@ -28,7 +24,7 @@ class SQLHelper{
     )
     """);
   }
-
+  
 
   static Future<sql.Database> db() async {
     return sql.openDatabase(
@@ -36,7 +32,7 @@ class SQLHelper{
       version: 1,
       onCreate: (sql.Database database, int version) async{
         await 
-        createRecipeTable(database);
+        createRecipeTables(database);
       }
     ); 
   }
@@ -60,13 +56,25 @@ class SQLHelper{
 
   static Future<List<Map<String, dynamic>>> getItem(List<String> ingredients) async {
   final db = await SQLHelper.db();
+  
+  // Constructing the WHERE clause dynamically
+  final List<String> whereClauses = [];
+  final List<dynamic> whereArgs = [];
+  
+  for (int i = 0; i < ingredients.length; i++) {
+    whereClauses.add('ingredients LIKE ?');
+    whereArgs.add('%${ingredients[i]}%');
+  }
+  
   final List<Map<String, dynamic>> recipes = await db.query(
     'recipe',
-    where: "ingredients IN (${List.filled(ingredients.length, '?').join(', ')})",
-    whereArgs: ingredients,
+    where: whereClauses.join(' OR '), // Combining the WHERE clauses with OR
+    whereArgs: whereArgs,
   );
+  
   return recipes;
 }
+
 
   static Future<int> updateItem(
     int id, String title, String? ingredients, String instructions) async {
@@ -76,7 +84,6 @@ class SQLHelper{
         'title': title,
         'ingredients': ingredients,
         'instructions': instructions,
-        'createdAt': DateTime.now().toString()
       };
 
       final result = 

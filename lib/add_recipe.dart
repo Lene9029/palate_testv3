@@ -14,6 +14,11 @@ class _AddRecipeState extends State<AddRecipe> {
 
   bool _isLoading = true;
 
+  void initState() {
+    super.initState();
+    _refreshRecipe();
+  }
+
   void _refreshRecipe() async {
     final data = await SQLHelper.getItems();
     setState(() {
@@ -40,6 +45,12 @@ class _AddRecipeState extends State<AddRecipe> {
     );
     _refreshRecipe();
   }
+
+  void _deleteItem(int id) async{
+    await SQLHelper.deleteItem(id);
+    _refreshRecipe();
+  }
+
   void _showForm(int? id) async {
     if (id != null){
 
@@ -57,26 +68,27 @@ class _AddRecipeState extends State<AddRecipe> {
         top: 15,
         bottom: MediaQuery.of(context).viewInsets.bottom + 100,
         
+        
       ),child: SingleChildScrollView(
         child: Column(
           children: [
             TextField(
               controller: _titleController,
-              decoration: InputDecoration(hintText: 'Recipe Title', fillColor: Colors.pink),
+              decoration: InputDecoration(hintText: 'Recipe Title', fillColor: Colors.pink, border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0))),
             ),
         
             SizedBox(height: 20,),
         
             TextField(
               controller: _ingredientsController,
-              decoration: InputDecoration(hintText: 'Ingredients', fillColor: Colors.pink),
+              decoration: InputDecoration(hintText: 'Ingredients', fillColor: Colors.pink,border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0))),
             ),
         
             SizedBox(height: 20,),
         
             TextField(
               controller: _instructionsController,
-              decoration: InputDecoration(hintText: 'Instructions', fillColor: Colors.pink),
+              decoration: InputDecoration(hintText: 'Instructions', fillColor: Colors.pink,border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0))),
             ),
             SizedBox(height: 20,),
             ElevatedButton(onPressed: () async {
@@ -109,12 +121,29 @@ class _AddRecipeState extends State<AddRecipe> {
       ),
        body: ListView.builder(
         itemCount: _recipe.length,
-         itemBuilder: (context, index) => Card(
-          color: Colors.pink,
+         itemBuilder: (context, index) => Card( 
+          color: Colors.blue,
+          margin: EdgeInsets.all(5),
           child: ListTile(
             title: Text(_recipe[index]['title']),
-            subtitle: Text(_recipe[index]['ingredients']),),
+            subtitle: Text(_recipe[index]['ingredients']),
+            trailing: SizedBox(
+              width: 100,
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit),
+                    onPressed: () => _showForm(_recipe[index]['id']),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () => _deleteItem(_recipe[index]['id'])),
+                ],
+              ),
+            ),
+          ),
          )),
+
       floatingActionButton: FloatingActionButton(child: const Icon(Icons.add),
        onPressed: () => _showForm(null)  ),
      
